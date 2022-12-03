@@ -1,0 +1,58 @@
+name: PsBilling Quality Control PHP
+
+on: [push]
+
+jobs:
+  php-linter:
+    name: PHP Syntax check 5.6|7.2|7.3
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2.0.0
+      - name: PHP syntax checker 5.6
+        uses: prestashop/github-action-php-lint/5.6@master
+      - name: PHP syntax checker 7.2
+        uses: prestashop/github-action-php-lint/7.2@master
+      - name: PHP syntax checker 7.3
+        uses: prestashop/github-action-php-lint/7.3@master
+
+  php-cs-fixer:
+    name: PHP-CS-FIXER
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2.0.0
+      - name: Run PHP-CS-Fixer
+        uses: prestashopcorp/github-action-php-cs-fixer@master
+
+  phpunit:
+    name: PHPUNIT
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup PHP with tools
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '7.3'
+      - name: Checkout
+        uses: actions/checkout@v2.0.0
+
+      - name: Cache vendor folder
+        uses: actions/cache@v1
+        with:
+          path: vendor
+          key: php-${{ hashFiles('composer.lock') }}
+
+      - name: Cache composer folder
+        uses: actions/cache@v1
+        with:
+          path: ~/.composer/cache
+          key: php-composer-cache
+
+      - name: Install dependencies
+        run: composer install
+
+      - name: PHPUnit tests
+        run: |
+          wget -O phpunit https://phar.phpunit.de/phpunit-5.phar
+          chmod +x phpunit
+          ./phpunit tests

@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div v-if="sub && sub.id">
+    <div v-if="display && sub.id">
       <form id="configuration_form" class="defaultForm form-horizontal socialbugcrm" :action="'index.php?controller=AdminModules&configure=socialbugcrm&token=' + tkn" method="post" enctype="multipart/form-data">
         <input type="hidden" name="submitsocialbugcrm" value="1">
         <div class="panel" id="fieldset_0">
@@ -56,6 +56,7 @@
         modalType: "",
         sub: null,
         tkn: window.token,
+        display: false
       };
     },
     // ...
@@ -82,6 +83,7 @@
         });
       },
       eventHookHandler(type, data) {
+        console.log('type, data: ', type, data);
         switch (type) {
           case EVENT_HOOK_TYPE.BILLING_INITIALIZED:
             // data structure is: { customer, subscription }
@@ -96,6 +98,7 @@
             this.sub = data.subscription;
             break;
         }
+        this.display = data.subscription.status === "active" ? true : false
       },
     },
     mounted() {
